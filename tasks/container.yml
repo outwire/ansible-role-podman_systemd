@@ -37,3 +37,4 @@
     state: restarted
     daemon_reload: yes
   when: container_systemd.changed or image_pull.changed
+  tags: [ skip_ansible_lint ]

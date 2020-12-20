@@ -4,7 +4,7 @@
     name: "{{ run_as_group }}"
 
 # TODO: handle an existing user which should not be added to the group
-- name: "{{ type }} '{{ item.name }}' - Add user '{{ run_as_user}}'"
+- name: "{{ type }} '{{ item.name }}' - Add user '{{ run_as_user }}'"
   user:
     name: "{{ run_as_user }}"
     group: "{{ run_as_group }}"
@@ -14,7 +14,7 @@
 # are already created on the system, could lead to duplicated ids
 # either system assigns subids automatically or user has to be created
 # outside of this role
-- name: "{{ type }} '{{ item.name }}' - Check for user '{{ run_as_user}}' subuid"
+- name: "{{ type }} '{{ item.name }}' - Check for user '{{ run_as_user }}' subuid"
   lineinfile:
     path: /etc/subuid
     regexp: '^{{ run_as_user }}:.*$'

@@ -56,3 +56,4 @@
     daemon_reload: yes
     enabled: yes
   when: pod_systemd.changed or container_systemd.changed or image_pull.changed
+  tags: [ skip_ansible_lint ]

@@ -4,16 +4,17 @@ galaxy_info:
   author: rxcket
   description: Configure podman pod and container systemd untis
   license: MIT
-  min_ansible_version: 2.4 ?
+  min_ansible_version: 2.4
   platforms:
     - name: Debian
       versions:
-        - 10
+        - buster
     - name: Ubuntu
       versions:
-        - 18.04
-        - 20.04
+        - bionic
+        - focal
     - name: Fedora
+      versions:
         - 32
         - 33
   galaxy_tags:
