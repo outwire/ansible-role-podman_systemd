@@ -1,0 +1,23 @@
+# CI is currently broken because podman in docker does not work properly
+# Error: 'overlay' is not supported over overlayfs, a mount_program is required: backing file system is unsupported for this graph driver
+---
+name: Molecule
+
+on:
+  push:
+  pull_request:
+#  schedule:
+#    - cron: "0 0 * * 0"
+
+jobs:
+  molecule:
+    name: Molecule
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          path: "${{ github.repository }}"
+
+      - name: Molecule
+        uses: robertdebock/molecule-action@2.6.8
