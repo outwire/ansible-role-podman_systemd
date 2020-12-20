@@ -1,0 +1,47 @@
+---
+- name: Converge
+  hosts: all
+
+  vars:
+    podman_containers:
+      - name: nginx
+        run_as_user: root
+        run_args:
+          -p 80:80
+        image: nginx
+
+    podman_pods:
+      - name: nextcloud
+        run_as_user: nextcloud
+        run_args:
+          -p 8080:80
+        restart: always
+        containers:
+          - name: db
+            image: mariadb
+            detached: true
+            run_args:
+              -v nextcloud-db:/var/lib/mysql
+              -e MYSQL_ROOT_PASSWORD=rootpw
+              -e MYSQL_PASSWORD=123
+              -e MYSQL_DATABASE=nextcloud
+              -e MYSQL_USER=nextcloud
+            cmd_args:
+              --transaction-isolation=READ-COMMITTED
+              --binlog-format=ROW
+          - name: app
+            image: nextcloud
+            run_args:
+              -v nextcloud-app:/var/www/html
+              -e MYSQL_ROOT_PASSWORD=rootpw
+              -e MYSQL_PASSWORD=123
+              -e MYSQL_DATABASE=nextcloud
+              -e MYSQL_USER=nextcloud
+
+  pre_tasks:
+    - name: Install podman
+      package:
+        name: podman
+
+  roles:
+    - ansible-role-podman_systemd

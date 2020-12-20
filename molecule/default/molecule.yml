@@ -1,0 +1,15 @@
+---
+dependency:
+  name: galaxy
+driver:
+  name: docker
+platforms:
+  - name: instance
+    image: "geerlingguy/docker-${MOLECULE_DISTRO:-fedora33}-ansible:latest"
+    pre_build_image: true
+provisioner:
+  name: ansible
+  env:
+    MOLECULE_VERBOSITY: 3
+verifier:
+    name: ansible
