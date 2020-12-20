@@ -1,0 +1,39 @@
+---
+- name: Container '{{ container.name }}' - Set facts
+  set_fact:
+    type: "Container"
+    run_as_user: "{{ container.run_as_user }}"
+    run_as_group: "{{ container.run_as_group | default(podman_systemd_default_container_run_as_group) }}"
+
+- name: Container '{{ item.name }}' - Prepare rootless
+  include_tasks: common/prepare-rootless.yml
+  when: item.run_as_user != "root"
+  vars:
+    item: "{{ container }}"
+
+- name: Container '{{ container.name }}' - Prepare
+  include_tasks: common/prepare.yml
+  vars:
+    become_user: "{{ container.run_as_user }}"
+
+- name: Container '{{ container.name }}' - Deploy systemd service
+  template:
+    src: systemd-container.service.j2
+    dest: "{{ podman_systemd_service_path }}/{{ podman_systemd_container_service_name }}"
+    owner: root
+    group: root
+    mode: 0644
+  register: container_systemd
+
+- name: Container '{{ container.name }}' - Start and enable
+  systemd:
+    name: "{{ podman_systemd_container_service_name }}"
+    state: started
+    enabled: yes
+
+- name: Container '{{ container.name }}' - Restart on changes
+  systemd:
+    name: "{{ podman_systemd_container_service_name }}"
+    state: restarted
+    daemon_reload: yes
+  when: container_systemd.changed or image_pull.changed

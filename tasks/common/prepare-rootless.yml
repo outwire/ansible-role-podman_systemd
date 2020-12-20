@@ -1,0 +1,38 @@
+---
+- name: "{{ type }} '{{ item.name }}' - Add group '{{ run_as_group }}'"
+  group:
+    name: "{{ run_as_group }}"
+
+# TODO: handle an existing user which should not be added to the group
+- name: "{{ type }} '{{ item.name }}' - Add user '{{ run_as_user}}'"
+  user:
+    name: "{{ run_as_user }}"
+    group: "{{ run_as_group }}"
+    password: '!'
+
+# does not add subids automatically because we don't know which users
+# are already created on the system, could lead to duplicated ids
+# either system assigns subids automatically or user has to be created
+# outside of this role
+- name: "{{ type }} '{{ item.name }}' - Check for user '{{ run_as_user}}' subuid"
+  lineinfile:
+    path: /etc/subuid
+    regexp: '^{{ run_as_user }}:.*$'
+    state: absent
+  check_mode: "yes"
+  changed_when: false
+  register: subuid
+  failed_when: not subuid.found
+
+- name: "{{ type }} '{{ item.name }}' - Check for group '{{ run_as_group }}' subgid"
+  lineinfile:
+    path: /etc/subgid
+    regexp: '^{{ run_as_group }}:.*$'
+    state: absent
+  check_mode: "yes"
+  changed_when: false
+  register: subgid
+  failed_when: not subgid.found
+
+# TODO: add subids if user wants to automatically
+# TODO: add specified subids if defined

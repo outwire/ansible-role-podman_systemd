@@ -1,0 +1,24 @@
+---
+galaxy_info:
+  role_name: podman_systemd
+  author: rxcket
+  description: Configure podman pod and container systemd untis
+  license: MIT
+  min_ansible_version: 2.4 ?
+  platforms:
+    - name: Debian
+      versions:
+        - 10
+    - name: Ubuntu
+      versions:
+        - 18.04
+        - 20.04
+    - name: Fedora
+        - 32
+        - 33
+  galaxy_tags:
+    - podman
+    - container
+    - systemd
+
+dependencies: []

@@ -1,0 +1,10 @@
+---
+# pull image manually before systemd start because it can take quite a while
+- name: "{{ type }} '{{ container.name }}' - Pull image '{{ container.image }}'"
+  containers.podman.podman_image:
+    name: "{{ container.image }}"
+    username: "{{ container.image_pull_user | default(omit) }}"
+    password: "{{ container.image_pull_password | default(omit) }}"
+  become: "yes"
+  become_user: "{{ become_user }}"
+  register: image_pull

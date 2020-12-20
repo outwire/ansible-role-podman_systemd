@@ -1,0 +1,46 @@
+[Unit]
+Description={{ container.name }} Podman container
+Wants={{ container.wants | default(podman_systemd_default_wants) }}
+After={{ container.after | default(podman_systemd_default_after) }}
+{% if pod.name is defined %}
+BindsTo={{ podman_systemd_pod_service_name }}
+After={{ podman_systemd_pod_service_name }}
+{% endif %}
+
+[Service]
+User={{ run_as_user }}
+Group={{ run_as_group }}
+Environment=PODMAN_SYSTEMD_UNIT=%n
+Restart={{ container.restart | default(podman_systemd_default_restart) }}
+
+ExecStartPre=/bin/rm -f {{ podman_systemd_pid_file }} {{ podman_systemd_cid_file }}
+ExecStart=/usr/bin/podman run --replace --name {{ container.name }} \
+  --conmon-pidfile {{ podman_systemd_pid_file }} \
+  --cidfile {{ podman_systemd_cid_file }} --cgroups=no-conmon \
+{% if pod.name is defined %}
+  --pod-id-file {{ podman_systemd_pod_id_file }} \
+{% endif %}
+{% if (container.detached is defined and container.detached) or podman_systemd_default_container_detached %}
+  -d \
+{% endif %}
+{% if container.run_args is defined %}
+  {{ container.run_args }} \
+{% endif %}
+  {{ container.image }} \
+{% if container.cmd_args is defined %}
+  {{ container.cmd_args }}
+{% endif %}
+
+ExecStop=/usr/bin/podman stop --ignore --cidfile {{ podman_systemd_cid_file }} -t 10
+ExecStopPost=/usr/bin/podman rm --ignore -f --cidfile {{ podman_systemd_cid_file }}
+
+PIDFile={{ podman_systemd_pid_file }}
+KillMode=none
+{% if (container.detached is defined and container.detached) or podman_systemd_default_container_detached %}
+Type=forking
+{% else %}
+Type=simple
+{% endif %}
+
+[Install]
+WantedBy={{ container.wantedby | default(podman_systemd_default_wantedby) }}

@@ -1,0 +1,58 @@
+---
+- name: Pod '{{ pod.name }}' - Set facts
+  set_fact:
+    run_as_user: "{{ pod.run_as_user }}"
+    run_as_group: "{{ pod.run_as_group | default(podman_systemd_default_pod_run_as_group) }}"
+
+- name: Pod '{{ item.name }}' - Prepare rootless
+  include_tasks: common/prepare-rootless.yml
+  when: item.run_as_user != "root"
+  vars:
+    item: "{{ pod }}"
+    type: "Pod"
+
+- name: Pod '{{ pod.name }}' - Prepare
+  include_tasks: common/prepare.yml
+  loop: "{{ pod.containers }}"
+  loop_control:
+    loop_var: container
+  vars:
+    become_user: "{{ pod.run_as_user }}"
+    type: "Pod '{{ pod.name }}' Container"
+
+- name: Pod '{{ pod.name }}' - Deploy systemd service
+  template:
+    src: systemd-pod.service.j2
+    dest: "{{ podman_systemd_service_path }}/{{ podman_systemd_pod_service_name }}"
+    owner: root
+    group: root
+    mode: 0644
+  register: pod_systemd
+
+- name: Pod '{{ pod.name }}' - Deploy containers systemd services
+  template:
+    src: systemd-container.service.j2
+    dest: "{{ podman_systemd_service_path }}/{{ podman_systemd_pod_container_service_name }}"
+    owner: root
+    group: root
+    mode: 0644
+  loop: "{{ pod.containers }}"
+  loop_control:
+    loop_var: container
+  register: container_systemd
+
+- name: Pod '{{ pod.name }}" - Start and enable
+  systemd:
+    name: "{{ podman_systemd_pod_service_name }}"
+    state: started
+    enabled: yes
+
+# restart the pod and its containers (systemd dependency) if pod or its container changes
+# requires additional task because notify doesn't work with loops if called multiple times
+- name: Pod '{{ pod.name }}' - Restart on changes
+  systemd:
+    name: "{{ podman_systemd_pod_service_name }}"
+    state: restarted
+    daemon_reload: yes
+    enabled: yes
+  when: pod_systemd.changed or container_systemd.changed or image_pull.changed

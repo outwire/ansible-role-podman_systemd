@@ -1,0 +1,39 @@
+[Unit]
+Description={{ pod.name }} Podman pod
+Wants={{ pod.wants | default(podman_systemd_default_wants) }}
+After={{ pod.after | default(podman_systemd_default_after) }}
+
+# TODO: use "podman_systemd_container_service_name" instead
+# FAILED! => {"changed": false, "msg": "AnsibleUndefinedVariable: 'container' is undefined"}
+
+# https://github.com/pallets/jinja/pull/1240
+# jinja 3.0.0 adds support for '+%}' to disable trim_blocks per block, work around using {{''}}
+# disable trim_blocks for full file adds newline below before run_args -> invalid systemd file
+
+Requires={%- for container in pod.containers %}{{ pod.name }}-{{ podman_systemd_container_service_prefix }}-{{ container.name }}.service {% endfor %}{{''}}
+Before={% for container in pod.containers %}{{ pod.name }}-{{ podman_systemd_container_service_prefix }}-{{ container.name }}.service {% endfor %}{{''}}
+
+[Service]
+User={{ pod.run_as_user }}
+Group={{ pod.run_as_group | default(podman_systemd_default_pod_run_as_group) }}
+Environment=PODMAN_SYSTEMD_UNIT=%n
+Restart={{ pod.restart | default(podman_systemd_default_restart) }}
+
+ExecStartPre=/bin/rm -f {{ podman_systemd_pid_file }} {{ podman_systemd_pod_id_file }}
+ExecStartPre=/usr/bin/podman pod create --replace --name={{ pod.name }} \
+  --infra-conmon-pidfile {{ podman_systemd_pid_file }} \
+  --pod-id-file {{ podman_systemd_pod_id_file }} \
+{% if pod.run_args is defined %}
+  {{ pod.run_args }}
+{% endif %}
+ExecStart=/usr/bin/podman pod start --pod-id-file {{ podman_systemd_pod_id_file }}
+
+ExecStop=/usr/bin/podman pod stop --ignore --pod-id-file {{ podman_systemd_pod_id_file }} -t 10
+ExecStopPost=/usr/bin/podman pod rm --ignore -f --pod-id-file {{ podman_systemd_pod_id_file }}
+
+PIDFile={{ podman_systemd_pid_file }}
+KillMode=none
+Type=forking
+
+[Install]
+WantedBy={{ pod.wantedby | default(podman_systemd_default_wantedby) }}

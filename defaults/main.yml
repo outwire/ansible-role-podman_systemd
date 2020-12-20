@@ -1,0 +1,33 @@
+---
+podman_containers: []
+podman_pods: []
+
+# systemd location and service names
+podman_systemd_service_path: /etc/systemd/system
+podman_systemd_container_service_prefix: "container"
+podman_systemd_container_service_name: "{{ podman_systemd_container_service_prefix }}-{{ container.name | default('none') }}.service"
+podman_systemd_pod_service_prefix: "pod"
+podman_systemd_pod_service_name: "{{ podman_systemd_pod_service_prefix }}-{{ pod.name | default('none') }}.service"
+podman_systemd_pod_container_service_prefix: "{{ pod.name }}"
+podman_systemd_pod_container_service_name: "{{ podman_systemd_pod_container_service_prefix }}-{{ podman_systemd_container_service_name }}"
+
+# systemd service defaults
+podman_systemd_default_wants: network.target
+podman_systemd_default_after: network-online.target
+podman_systemd_default_restart: on-failure
+podman_systemd_default_wantedby: multi-user.target default.target
+
+# pod and container creation defaults
+podman_systemd_default_container_run_as_group: "{{ container.run_as_user }}"
+podman_systemd_default_pod_run_as_group: "{{ pod.run_as_user }}"
+podman_systemd_default_container_detached: false
+
+# systemd tmp path, used for ids below
+podman_systemd_tmp_path: "{{ '/tmp' if ansible_os_family == 'RedHat' and
+ansible_distribution_major_version|int == 7 else '%T' }}"
+
+# id location and files
+podman_systemd_id_base_path: "{{ podman_systemd_tmp_path }}/%N"
+podman_systemd_pid_file: "{{ podman_systemd_id_base_path }}.pid"
+podman_systemd_cid_file: "{{ podman_systemd_id_base_path }}.ctr-id"
+podman_systemd_pod_id_file: "{{ podman_systemd_tmp_path }}/{{ podman_systemd_pod_service_prefix }}-{{ pod.name | default('none') }}.pod-id"
