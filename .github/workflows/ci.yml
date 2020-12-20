@@ -1,11 +1,11 @@
 ---
-name: Lint
+name: lint
 
 on: [ push, pull_request ]
 
 jobs:
   lint:
-    name: Lint
+    name: lint
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
