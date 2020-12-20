@@ -31,7 +31,7 @@ podman_systemd_default_container_detached: false
 Containers start attached by default so you can catch the output in the syslog. If you want do detach them, change to `true`. This can be changed for each pod / container (see below).
 
 
-All other variables can be found in [defaults/main.yml]
+All other variables can be found in [defaults/main.yml](defaults/main.yml)
 
 
 ## Example container variable
@@ -40,12 +40,12 @@ All other variables can be found in [defaults/main.yml]
 podman_containers:
   - name: nginx
     run_as_user: root
-    run_args: >-
+    run_args:
       -p 80:80
     image: nginx:latest
   - name: node-exporter
     run_as_user: prometheus
-    run_args: >-
+    run_args:
       -p 9100:9100
     image: quay.io/prometheus/node-exporter:v1.0.1
 ```
@@ -59,21 +59,23 @@ podman_pods:
     run_as_user: nextcloud
     run_args:
       -p 8080:80
+    restart: always
     containers:
       - name: db
         image: mariadb
-        run_args: >-
+        detached: true
+        run_args:
           -v nextcloud-db:/var/lib/mysql
           -e MYSQL_ROOT_PASSWORD=rootpw
           -e MYSQL_PASSWORD=123
           -e MYSQL_DATABASE=nextcloud
           -e MYSQL_USER=nextcloud
-        cmd_args: >-
+        cmd_args:
           --transaction-isolation=READ-COMMITTED
           --binlog-format=ROW
       - name: app
         image: nextcloud
-        run_args: >-
+        run_args:
           -v nextcloud-app:/var/www/html
           -e MYSQL_ROOT_PASSWORD=rootpw
           -e MYSQL_PASSWORD=123
