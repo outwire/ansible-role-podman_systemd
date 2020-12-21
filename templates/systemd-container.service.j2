@@ -26,8 +26,7 @@ ExecStart=/usr/bin/podman run --replace --name {{ container.name }} \
 {% if container.run_args is defined %}
   {{ container.run_args }} \
 {% endif %}
-  {{ container.image }} \
-{% if container.cmd_args is defined %}
+  {{ container.image }}{% if container.cmd_args is defined %} \
   {{ container.cmd_args }}
 {% endif %}
 
