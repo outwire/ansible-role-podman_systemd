@@ -14,7 +14,7 @@ Environment=PODMAN_SYSTEMD_UNIT=%n
 Restart={{ container.restart | default(podman_systemd_default_restart) }}
 
 ExecStartPre=/bin/rm -f {{ podman_systemd_pid_file }} {{ podman_systemd_cid_file }}
-ExecStart=/usr/bin/podman run --replace --name {{ container.name }} \
+ExecStart=/usr/bin/podman run --replace --name {% if pod.name is defined %}{{ pod.name }}_{% endif %}{{ container.name }} \
   --conmon-pidfile {{ podman_systemd_pid_file }} \
   --cidfile {{ podman_systemd_cid_file }} --cgroups=no-conmon \
 {% if pod.name is defined %}
