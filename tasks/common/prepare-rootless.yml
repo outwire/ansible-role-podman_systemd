@@ -9,6 +9,7 @@
     name: "{{ run_as_user }}"
     group: "{{ run_as_group }}"
     password: '!'
+    shell: /bin/bash
 
 # does not add subids automatically because we don't know which users
 # are already created on the system, could lead to duplicated ids
