@@ -1,8 +1,8 @@
 # Ansible Role Podman Systemd
 
-![lint](https://github.com/rxcket/ansible-role-podman_systemd/workflows/lint/badge.svg)
-![quality](https://img.shields.io/ansible/quality/52411)
-![license](https://img.shields.io/github/license/rxcket/ansible-role-podman_systemd)
+![lint](https://github.com/outwire/ansible-role-podman_systemd/workflows/lint/badge.svg)
+![quality](https://img.shields.io/ansible/quality/52917)
+![license](https://img.shields.io/github/license/outwire/ansible-role-podman_systemd)
 
 Configure podman pod and container systemd untis
 
