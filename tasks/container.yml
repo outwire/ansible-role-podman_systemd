@@ -3,7 +3,7 @@
   set_fact:
     type: "Container"
     run_as_user: "{{ container.run_as_user }}"
-    run_user_subid: "{{ container.run_user_subid }}"
+    run_user_subid: "{{ container.run_user_subid | default(omit) }}"
     run_as_group: "{{ container.run_as_group | default(podman_systemd_default_container_run_as_group) }}"
 
 - name: Container '{{ item.name }}' - Prepare rootless
