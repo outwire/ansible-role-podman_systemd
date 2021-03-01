@@ -38,6 +38,11 @@ Containers start attached by default so you can catch the output in the syslog. 
 All other variables can be found in [defaults/main.yml](defaults/main.yml)
 
 
+## Caveats
+
+While this role theoretically supports to run a rootless container or pod with a "non main user group" (e.g. user "test" and group "asdf" instead of group "test") there might be some caveats with subuids/gids in such a constellation.
+
+
 ## Example container variable
 
 ```yaml
@@ -61,6 +66,7 @@ podman_containers:
 podman_pods:
   - name: nextcloud
     run_as_user: nextcloud
+    run_user_subid: 500000:100000
     run_args:
       -p 8080:80
     restart: always

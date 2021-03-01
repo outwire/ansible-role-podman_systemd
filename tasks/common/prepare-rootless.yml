@@ -11,10 +11,26 @@
     password: '!'
     shell: /bin/bash
 
-# does not add subids automatically because we don't know which users
-# are already created on the system, could lead to duplicated ids
-# either system assigns subids automatically or user has to be created
-# outside of this role
+- name: "{{ type }} '{{ item.name }}' - Add specified subuids"
+  ansible.builtin.lineinfile:
+    path: /etc/subuid
+    regexp: "^{{ run_as_user }}:.*"
+    line: "{{ run_as_user }}:{{ run_user_subid }}"
+    owner: root
+    group: root
+    mode: 0644
+  when: run_user_subid is defined
+
+- name: "{{ type }} '{{ item.name }}' - Add specified subgids"
+  ansible.builtin.lineinfile:
+    path: /etc/subgid
+    regexp: "^{{ run_as_user }}:.*"
+    line: "{{ run_as_user }}:{{ run_user_subid }}"
+    owner: root
+    group: root
+    mode: 0644
+  when: run_user_subid is defined
+
 - name: "{{ type }} '{{ item.name }}' - Check for user '{{ run_as_user }}' subuid"
   lineinfile:
     path: /etc/subuid
@@ -25,6 +41,8 @@
   register: subuid
   failed_when: not subuid.found
 
+# NOTE: subgids are actually for users and not groups
+#       https://man7.org/linux/man-pages/man5/subgid.5.html
 - name: "{{ type }} '{{ item.name }}' - Check for group '{{ run_as_group }}' subgid"
   lineinfile:
     path: /etc/subgid
@@ -36,4 +54,3 @@
   failed_when: not subgid.found
 
 # TODO: add subids if user wants to automatically
-# TODO: add specified subids if defined

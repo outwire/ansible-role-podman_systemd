@@ -2,6 +2,7 @@
 - name: Pod '{{ pod.name }}' - Set facts
   set_fact:
     run_as_user: "{{ pod.run_as_user }}"
+    run_user_subid: "{{ pod.run_user_subid }}"
     run_as_group: "{{ pod.run_as_group | default(podman_systemd_default_pod_run_as_group) }}"
 
 - name: Pod '{{ item.name }}' - Prepare rootless
