@@ -12,6 +12,11 @@
   vars:
     item: "{{ container }}"
 
+- name: prune testing
+  command: "podman system prune --force"
+  become: yes
+  become_user: "{{ container.run_as_user }}"
+
 - name: Container '{{ container.name }}' - Prepare
   include_tasks: common/prepare.yml
   vars:

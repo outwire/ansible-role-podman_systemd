@@ -12,6 +12,11 @@
     item: "{{ pod }}"
     type: "Pod"
 
+- name: prune testing
+  command: "podman system prune --force"
+  become: yes
+  become_user: "{{ pod.run_as_user }}"
+
 - name: Pod '{{ pod.name }}' - Prepare
   include_tasks: common/prepare.yml
   loop: "{{ pod.containers }}"
